@@ -1,56 +1,77 @@
 import 'package:flutter/foundation.dart';
 import 'package:rental_car/domain/models/car.dart';
 import 'package:rental_car/domain/repositories/car_repository.dart';
+import 'car_state.dart';
 
 class CarViewModel extends ChangeNotifier {
   final CarRepository _repository;
 
-  CarViewModel(this._repository);
+  // View membaca state ini.
+  CarState _state = const CarLoading();
+  CarState get state => _state;
 
-  // ListCar yang ditampilkan View.
-  List<Car> get cars => _repository.getAllCars();
+  CarViewModel(this._repository) {
+    _load();
+  }
 
-  // errorMessage untuk ditampilkan ke user. Null berarti tidak ada error.
-  String? _errorMessage;
-  String? get errorMessage => _errorMessage;
+  void loadCars() {
+    _state = const CarLoading();
+    notifyListeners();
+    _load();
+    notifyListeners();
+  }
 
-  // rentCar berdasarkan id.
+  void _load() {
+    try {
+      _state = CarLoaded(cars: _repository.getAllCars());
+    } catch (_) {
+      _state = const CarFailure('Gagal memuat daftar mobil. Silakan coba lagi.');
+    }
+  }
+
   void rentCar(int id) {
     final car = _findCar(id);
 
     if (car == null) {
-      _errorMessage = 'Mobil tidak ditemukan.';
+      _state = const CarFailure('Mobil tidak ditemukan.');
       notifyListeners();
       return;
     }
 
     if (!car.isAvailable) {
-      _errorMessage = '${car.name} sedang disewa. Pilih mobil lain atau tunggu sampai kembali.';
+      _state = CarFailure('${car.name} sedang disewa. Pilih mobil lain atau tunggu sampai kembali.');
       notifyListeners();
       return;
     }
 
     _repository.updateCar(car.copyWith(isAvailable: false));
-    _errorMessage = null;
+    _load();
     notifyListeners();
   }
 
-  // returnCar berdasarkan id.
   void returnCar(int id) {
     final car = _findCar(id);
 
     if (car == null) {
-      _errorMessage = 'Mobil tidak ditemukan.';
+      _state = const CarFailure('Mobil tidak ditemukan.');
       notifyListeners();
       return;
     }
 
     _repository.updateCar(car.copyWith(isAvailable: true));
-    _errorMessage = null;
+    _load();
     notifyListeners();
   }
 
-  // Mencari mobil berdasarkan id. Return null kalau tidak ada.
+  // Menghitung total biaya
+  int calculateTotal(Car car, {required int lateHours}) {
+    final extraDays = lateHours ~/ 12;
+    final rentalDays = 1 + extraDays;
+    final rentalCost = car.dailyPrice * rentalDays;
+    final lateFee = car.lateFeePerHour * lateHours;
+    return rentalCost + lateFee;
+  }
+
   Car? _findCar(int id) {
     for (final car in _repository.getAllCars()) {
       if (car.id == id) return car;
