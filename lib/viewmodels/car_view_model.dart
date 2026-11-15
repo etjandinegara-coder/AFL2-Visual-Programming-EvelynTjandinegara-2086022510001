@@ -63,15 +63,24 @@ class CarViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Menghitung total biaya
-  int calculateTotal(Car car, {required int lateHours}) {
-    final extraDays = lateHours ~/ 12;
-    final rentalDays = 1 + extraDays;
+  ({int rentalDays, int rentalCost, int lateFee, int total}) returnSummary(
+      Car car, {
+        required int lateHours,
+      }) {
+    final rentalDays = 1 + lateHours ~/ 12;
     final rentalCost = car.dailyPrice * rentalDays;
     final lateFee = car.lateFeePerHour * lateHours;
-    return rentalCost + lateFee;
+    return (
+    rentalDays: rentalDays,
+    rentalCost: rentalCost,
+    lateFee: lateFee,
+    total: rentalCost + lateFee,
+    );
   }
 
+  int calculateTotal(Car car, {required int lateHours}) {
+    return returnSummary(car, lateHours: lateHours).total;
+  }
   Car? _findCar(int id) {
     for (final car in _repository.getAllCars()) {
       if (car.id == id) return car;

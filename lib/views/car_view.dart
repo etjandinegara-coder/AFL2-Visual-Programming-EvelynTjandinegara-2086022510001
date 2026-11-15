@@ -39,6 +39,45 @@ class _CarList extends StatelessWidget {
 
   const _CarList({required this.cars, required this.viewModel});
 
+  // Alur pengembalian: tanya jam terlambat, tampilkan rincian, lalu konfirmasi.
+  Future<void> _onReturn(BuildContext context, Car car) async {
+    final lateHours = await showDialog<int>(
+      context: context,
+      builder: (_) => const _LateHoursDialog(),
+    );
+    if (lateHours == null || !context.mounted) return;
+
+    final s = viewModel.returnSummary(car, lateHours: lateHours);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Rincian ${car.name}'),
+        content: Text(
+          'Hari sewa: ${s.rentalDays}\n'
+              'Biaya sewa: Rp ${s.rentalCost}\n'
+              'Terlambat: $lateHours jam\n'
+              'Denda: Rp ${s.lateFee}\n'
+              'Total: Rp ${s.total}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Bayar & kembalikan'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      viewModel.returnCar(car.id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -58,7 +97,7 @@ class _CarList extends StatelessWidget {
                 child: const Text('Sewa'),
               ),
               TextButton(
-                onPressed: () => viewModel.returnCar(car.id),
+                onPressed: () => _onReturn(context, car),
                 child: const Text('Kembali'),
               ),
             ],
@@ -89,6 +128,48 @@ class _ErrorView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _LateHoursDialog extends StatefulWidget {
+  const _LateHoursDialog();
+
+  @override
+  State<_LateHoursDialog> createState() => _LateHoursDialogState();
+}
+
+class _LateHoursDialogState extends State<_LateHoursDialog> {
+  final _controller = TextEditingController(text: '0');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Berapa jam terlambat?'),
+      content: TextField(
+        controller: _controller,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(labelText: 'Jam terlambat'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final hours = int.tryParse(_controller.text.trim()) ?? 0;
+            Navigator.pop(context, hours < 0 ? 0 : hours);
+          },
+          child: const Text('Lanjut'),
+        ),
+      ],
     );
   }
 }
