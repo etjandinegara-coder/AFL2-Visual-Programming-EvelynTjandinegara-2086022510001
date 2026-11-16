@@ -50,3 +50,13 @@ ViewModel hanya mengenal kontrak 'CarRepository'. Dengan begitu, tes memakai 'Fa
 - Angka rupiah belum diberi pemisah ribuan.
 - Hanya ada satu fitur utama (daftar, sewa, kembali). Belum ada fitur lain yang memakai pola yang sama.
 - Konvensi Modul 1 belum diterapkan karena belum ada catatannya di repositori ini.
+
+8. Source-Swap Evidence
+
+Sumber data berpindah dari daftar di memori ke 'shared_preferences'.
+
+- Commit perpindahan: '5288fca' (pesan commit: "tambah unit test dan perbaiki widget test dengan mock shared_preferences")
+- Versi awal (memori): '48dc335' (First Commit - AFL2)
+- 'lib/data/repositories/car_repository_implementation.dart': 57 baris ditambah, 18 dihapus.
+- 'lib/viewmodels/car_view_model.dart': ikut berubah, karena 'getAllCars()' dan 'updateCar()' menjadi 'Future'.
+- 'lib/views/': tidak ada perubahan pada logika tampilan.
