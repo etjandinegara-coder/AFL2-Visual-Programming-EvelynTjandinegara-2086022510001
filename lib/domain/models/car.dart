@@ -1,4 +1,6 @@
-class Car {
+import 'package:equatable/equatable.dart';
+
+class Car extends Equatable {
   final int id;
   final String name;
   final int dailyPrice;
@@ -22,4 +24,7 @@ class Car {
       isAvailable: isAvailable ?? this.isAvailable,
     );
   }
+
+  @override
+  List<Object?> get props => [id, name, dailyPrice, lateFeePerHour, isAvailable];
 }

@@ -1,7 +1,7 @@
 import 'package:rental_car/domain/models/car.dart';
 
 abstract class CarRepository {
-  List<Car> getAllCars();
+  Future<List<Car>> getAllCars();
 
-  void updateCar(Car car);
+  Future<void> updateCar(Car car);
 }
