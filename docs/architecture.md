@@ -60,3 +60,21 @@ Sumber data berpindah dari daftar di memori ke 'shared_preferences'.
 - 'lib/data/repositories/car_repository_implementation.dart': 57 baris ditambah, 18 dihapus.
 - 'lib/viewmodels/car_view_model.dart': ikut berubah, karena 'getAllCars()' dan 'updateCar()' menjadi 'Future'.
 - 'lib/views/': tidak ada perubahan pada logika tampilan.
+
+9. Keputusan dan Alternatif yang Ditolak
+
+Data rusak (corrupt read)
+- Dipilih: jika 'jsonDecode' gagal, daftar dikembalikan ke kondisi awal dan data rusak ditimpa.
+- Ditolak: menampilkan 'CarFailure' dengan tombol "Coba lagi".
+- Alasan: aplikasi tetap bisa dipakai, dan data rusak tidak terus-menerus menghalangi pembukaan aplikasi.
+- Konsekuensi: status sewa yang rusak hilang tanpa pemberitahuan ke pengguna.
+
+Penyimpanan: shared_preferences
+- Dipilih: key-value dengan satu kunci 'cars' berisi JSON.
+- Ditolak: database (misalnya Hive atau SQLite).
+- Alasan: datanya kecil (10 mobil), cukup satu kunci, dan lebih sederhana untuk tahap belajar.
+
+Tema
+- Dipilih: 'ColorScheme.fromSeed' dengan satu warna dasar.
+- Ditolak: menentukan setiap warna secara manual per widget.
+- Alasan: warna konsisten dan mudah diganti dari satu tempat.
