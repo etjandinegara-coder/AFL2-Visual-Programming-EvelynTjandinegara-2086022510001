@@ -12,13 +12,11 @@ class CarView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Rental Mobil')),
-      // ListenableBuilder menggambar ulang layar setiap kali ViewModel memanggil notifyListeners().
       body: ListenableBuilder(
         listenable: viewModel,
         builder: (context, _) {
           final state = viewModel.state;
 
-          // View hanya memilih widget sesuai kondisi. Karena CarState sealed, semua kondisi wajib ditangani.
           return switch (state) {
             CarLoading() => const Center(child: CircularProgressIndicator()),
             CarLoaded(:final cars) => _CarList(cars: cars, viewModel: viewModel),
@@ -79,61 +77,78 @@ class _CarList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: cars.length,
       itemBuilder: (context, index) {
         final car = cars[index];
-        final available = car.isAvailable;
+        return _CarCard(
+          car: car,
+          onRent: () => viewModel.rentCar(car.id),
+          onReturn: () => _onReturn(context, car),
+        );
+      },
+    );
+  }
+}
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+class _CarCard extends StatelessWidget {
+  final Car car;
+  final VoidCallback onRent;
+  final VoidCallback onReturn;
+
+  const _CarCard({
+    required this.car,
+    required this.onRent,
+    required this.onReturn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final available = car.isAvailable;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(car.name, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text('Rp ${car.dailyPrice}/hari', style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 8),
+            Row(
               children: [
-                Text(car.name, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Text(
-                  'Rp ${car.dailyPrice}/hari',
-                  style: theme.textTheme.bodyMedium,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: available ? colors.primaryContainer : colors.errorContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    available ? 'Tersedia' : 'Disewa',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: available ? colors.onPrimaryContainer : colors.onErrorContainer,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: available ? colors.primaryContainer : colors.errorContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        available ? 'Tersedia' : 'Disewa',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: available ? colors.onPrimaryContainer : colors.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: available ? () => viewModel.rentCar(car.id) : null,
-                      child: const Text('Sewa'),
-                    ),
-                    TextButton(
-                      onPressed: () => _onReturn(context, car),
-                      child: const Text('Kembali'),
-                    ),
-                  ],
+                const Spacer(),
+                TextButton(
+                  onPressed: available ? onRent : null,
+                  child: const Text('Sewa'),
+                ),
+                TextButton(
+                  onPressed: onReturn,
+                  child: const Text('Kembali'),
                 ),
               ],
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
@@ -205,10 +220,8 @@ class _LateHoursDialogState extends State<_LateHoursDialog> {
           child: const Text('Batal'),
         ),
         ElevatedButton(
-          onPressed: () {
-            final hours = int.tryParse(_controller.text.trim()) ?? 0;
-            Navigator.pop(context, hours < 0 ? 0 : hours);
-          },
+          // View hanya mengirim teks mentah. Parsing dilakukan ViewModel.
+          onPressed: () => Navigator.pop(context, _controller.text),
           child: const Text('Lanjut'),
         ),
       ],

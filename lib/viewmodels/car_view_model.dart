@@ -75,6 +75,18 @@ class CarViewModel extends ChangeNotifier {
     return returnSummary(car, lateHours: lateHours).total;
   }
 
+  // Aturan: mobil hanya bisa disewa jika sedang tersedia.
+  bool canRent(Car car) => car.isAvailable;
+
+  // Aturan: label status yang ditampilkan ke user.
+  String statusLabel(Car car) => car.isAvailable ? 'Tersedia' : 'Disewa';
+
+  // Aturan: input jam harus angka, dan tidak boleh negatif.
+  int parseLateHours(String input) {
+    final hours = int.tryParse(input.trim()) ?? 0;
+    return hours < 0 ? 0 : hours;
+  }
+
   Future<Car?> _findCar(int id) async {
     final cars = await _repository.getAllCars();
     for (final car in cars) {
