@@ -39,7 +39,6 @@ class _CarList extends StatelessWidget {
 
   const _CarList({required this.cars, required this.viewModel});
 
-  // Alur pengembalian: tanya jam terlambat, tampilkan rincian, lalu konfirmasi.
   Future<void> _onReturn(BuildContext context, Car car) async {
     final lateHours = await showDialog<int>(
       context: context,
@@ -80,30 +79,58 @@ class _CarList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return ListView.builder(
+      padding: const EdgeInsets.all(16),
       itemCount: cars.length,
       itemBuilder: (context, index) {
         final car = cars[index];
-        return ListTile(
-          title: Text(
-            car.name,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          subtitle: Text(
-            'Rp ${car.dailyPrice}/hari · ${car.isAvailable ? 'Tersedia' : 'Disewa'}',
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
-                onPressed: () => viewModel.rentCar(car.id),
-                child: const Text('Sewa'),
-              ),
-              TextButton(
-                onPressed: () => _onReturn(context, car),
-                child: const Text('Kembali'),
-              ),
-            ],
+        final available = car.isAvailable;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(car.name, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text(
+                  'Rp ${car.dailyPrice}/hari',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: available ? colors.primaryContainer : colors.errorContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        available ? 'Tersedia' : 'Disewa',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: available ? colors.onPrimaryContainer : colors.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: available ? () => viewModel.rentCar(car.id) : null,
+                      child: const Text('Sewa'),
+                    ),
+                    TextButton(
+                      onPressed: () => _onReturn(context, car),
+                      child: const Text('Kembali'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -119,17 +146,29 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Coba lagi'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, color: colors.error, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(color: colors.error),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: onRetry,
+              child: const Text('Coba lagi'),
+            ),
+          ],
+        ),
       ),
     );
   }
