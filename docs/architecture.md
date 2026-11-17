@@ -84,3 +84,14 @@ Tema
 - Diuji di emulator/perangkat standar (Pixel 8): daftar mobil tampil, tombol Sewa dan Kembali terlihat penuh.
 - Belum diuji: ukuran layar kedua (layar kecil) dan rotasi layar.
 - Risiko yang belum diverifikasi: baris tombol di 'Card' bisa overflow pada layar sempit.
+
+11. Pemisahan Logika dan Tampilan (Indikator 3.1)
+
+View hanya menampilkan data dan meneruskan input mentah ke ViewModel. Aturan berikut ada di ViewModel, bukan di View:
+
+- Mobil hanya bisa disewa jika tersedia ('canRent').
+- Label status ditentukan dari data ('statusLabel').
+- Input jam keterlambatan diparsing dan dibatasi tidak negatif ('parseLateHours').
+- Perhitungan hari sewa, denda, dan total ('returnSummary').
+
+Pemilihan warna dan ukuran dari 'colorScheme' dan 'textTheme' tetap di View, karena itu bagian dari tampilan.
