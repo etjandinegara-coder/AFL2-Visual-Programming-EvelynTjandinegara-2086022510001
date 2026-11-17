@@ -78,3 +78,9 @@ Tema
 - Dipilih: 'ColorScheme.fromSeed' dengan satu warna dasar.
 - Ditolak: menentukan setiap warna secara manual per widget.
 - Alasan: warna konsisten dan mudah diganti dari satu tempat.
+
+10. Uji Layout (Indikator 3.3)
+
+- Diuji di emulator/perangkat standar (Pixel 8): daftar mobil tampil, tombol Sewa dan Kembali terlihat penuh.
+- Belum diuji: ukuran layar kedua (layar kecil) dan rotasi layar.
+- Risiko yang belum diverifikasi: baris tombol di 'Card' bisa overflow pada layar sempit.
