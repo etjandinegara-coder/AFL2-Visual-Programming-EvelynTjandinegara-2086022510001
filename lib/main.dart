@@ -19,6 +19,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1565C0),
+        ),
+        textTheme: const TextTheme(
+          titleMedium: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
       home: CarView(viewModel: viewModel),
     );
   }

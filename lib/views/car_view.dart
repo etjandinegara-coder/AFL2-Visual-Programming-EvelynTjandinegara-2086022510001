@@ -85,7 +85,10 @@ class _CarList extends StatelessWidget {
       itemBuilder: (context, index) {
         final car = cars[index];
         return ListTile(
-          title: Text(car.name),
+          title: Text(
+            car.name,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           subtitle: Text(
             'Rp ${car.dailyPrice}/hari · ${car.isAvailable ? 'Tersedia' : 'Disewa'}',
           ),
