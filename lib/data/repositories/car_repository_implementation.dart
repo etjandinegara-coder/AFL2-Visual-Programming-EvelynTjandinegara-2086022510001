@@ -30,8 +30,15 @@ class CarRepositoryImpl implements CarRepository {
       return _initialCars.toList();
     }
 
-    final List<dynamic> decoded = jsonDecode(raw);
-    return decoded.map((item) => _fromJson(item as Map<String, dynamic>)).toList();
+    try {
+      final List<dynamic> decoded = jsonDecode(raw);
+      return decoded
+          .map((item) => _fromJson(item as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      await _saveAll(_initialCars.toList());
+      return _initialCars.toList();
+    }
   }
 
   @override
